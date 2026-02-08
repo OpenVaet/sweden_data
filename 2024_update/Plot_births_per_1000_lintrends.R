@@ -214,7 +214,7 @@ p1 <- ggplot() +
   
   # Labels and theme
   labs(title = "Sweden: Births per 1,000 Women by Age Group (2010-2024)",
-       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals (extended to 2024)\nPercentage deviations shown for 2020-2024",
+       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals\nPercentage deviations shown for 2020-2024",
        x = "Year",
        y = "Births per 1,000 Women",
        caption = "Data source: Statistics Sweden\nDashed lines represent linear trend extrapolation from 2010-2019") +
@@ -360,7 +360,7 @@ p2 <- ggplot() +
   
   # Labels and theme
   labs(title = "Sweden: Age-Specific Fertility Rates (ASFR) by Age Group (2010-2024)",
-       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals (extended to 2024)\nPercentage deviations shown for 2020-2024",
+       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals\nPercentage deviations shown for 2020-2024",
        x = "Year",
        y = "Age-Specific Fertility Rate (births per woman)",
        caption = "Data source: Statistics Sweden\nASFR = Number of births / Female population in age group\nDashed lines represent linear trend extrapolation from 2010-2019") +
@@ -445,7 +445,7 @@ total_data <- merged_data %>%
 total_subset <- total_data %>% filter(year >= 2010, year <= 2019)
 total_fit <- lm(total_asfr ~ year, data = total_subset)
 
-# Generate predictions with 95% intervals (extended to 2024)
+# Generate predictions with 95% intervals
 pred_years_total <- data.frame(year = 2010:2024)
 total_pred_interval <- predict(total_fit, newdata = pred_years_total, 
                                interval = "prediction", level = 0.95)
@@ -514,7 +514,7 @@ p3 <- ggplot() +
   
   # Labels and theme
   labs(title = "Sweden: Total Age-Specific Fertility Rate (All Ages Combined, 2010-2024)",
-       subtitle = "Weighted ASFR across all reproductive age groups (15-48) with 95% prediction interval (extended to 2024)\nLinear trend fitted on 2010-2019 data; percentage deviations shown for 2020-2024",
+       subtitle = "Weighted ASFR across all reproductive age groups (15-48) with 95% prediction interval\nLinear trend fitted on 2010-2019 data; percentage deviations shown for 2020-2024",
        x = "Year",
        y = "Total ASFR (births per woman across all ages)",
        caption = "Data source: Statistics Sweden\nTotal ASFR = Sum of births across all age groups / Sum of female population (ages 15-48)\nDashed line represents linear trend extrapolation from 2010-2019") +
