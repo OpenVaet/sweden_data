@@ -16,109 +16,121 @@ birth_data <- birth_data[!is.na(birth_data$`age.of.the.Mother`) & birth_data$`ag
 # Exclude the 49 years & over
 birth_data <- birth_data[!is.na(birth_data$`age.of.the.Mother`) & birth_data$`age.of.the.Mother` <= 49,]
 
-# Sum the total births for both children sexes for each year
 library(dplyr)
 library(tidyr)
+
+# Sum the total births for both children sexes for each year
 birth_data_grouped <- birth_data %>%
   group_by(region, `age.of.the.Mother`) %>%
-  summarise(across(starts_with("X"), sum, na.rm = TRUE))
+  summarise(across(starts_with("X"), sum, na.rm = TRUE), .groups = "drop")
 
 # Remove the "X" from the year column names
 names(birth_data_grouped) <- sub("^X", "", names(birth_data_grouped))
 
-# Create age groups
-birth_data_grouped$age_group <- cut(birth_data_grouped$`age.of.the.Mother`,
-                                    breaks = c(15, 20, 25, 30, Inf),
-                                    labels = c("15-19", "20-24", "25-29", "30-48"),
-                                    right = FALSE)
+# --- NEW: detect year columns dynamically (supports 2024, 2025, ...)
+year_cols <- names(birth_data_grouped)[grepl("^\\d{4}$", names(birth_data_grouped))]
+year_cols <- sort(year_cols)
 
-# Aggregate data by year and age group
+# Create age groups
+birth_data_grouped$age_group <- cut(
+  birth_data_grouped$`age.of.the.Mother`,
+  breaks = c(15, 20, 25, 30, Inf),
+  labels = c("15-19", "20-24", "25-29", "30-48"),
+  right = FALSE
+)
+
+# Aggregate data by year and age group (now includes 2024 automatically if present)
 yearly_data <- birth_data_grouped %>%
   group_by(age_group) %>%
-  summarise(across(`2000`:`2023`, sum, na.rm = TRUE))
+  summarise(across(all_of(year_cols), sum, na.rm = TRUE), .groups = "drop")
 
-# Reshape the data from wide to long format & ensure that 'year' is treated as a numeric variable
+# Reshape wide -> long and keep >= 2010
 data_long <- pivot_longer(yearly_data, cols = -age_group, names_to = "year", values_to = "births")
-data_long$year <- as.numeric(as.character(data_long$year))
-data_long <- data_long %>%
-  filter(year >= 2010)
+data_long$year <- as.numeric(data_long$year)
+data_long <- data_long %>% filter(year >= 2010)
 print(data_long)
 
-# Write the yearly_data to a CSV file for re-use
+# Write the long data to CSV
 write.csv(data_long, "2024_update/births_by_years_and_mothers_age_groups.csv", row.names = FALSE)
 
-# Create a new column 'type' to distinguish between actual and trend data
+# Mark actuals
 data_long$type <- "Actual"
 
 # Split the data by age_group
 age_groups <- split(data_long, data_long$age_group)
 
-# Initialize a list to store the trends
+# Fit linear trend 2010-2019 for each age_group
 trends <- list()
-
-# Calculate the linear trend for 2010-2019 for each age_group
-for (age_group in names(age_groups)) {
-  subset_data <- subset(age_groups[[age_group]], year >= 2010 & year <= 2019)
-  fit <- lm(births ~ year, data = subset_data)
-  trends[[age_group]] <- fit
+for (ag in names(age_groups)) {
+  subset_data <- subset(age_groups[[ag]], year >= 2010 & year <= 2019)
+  trends[[ag]] <- lm(births ~ year, data = subset_data)
 }
-trend_data <- do.call(rbind, lapply(names(trends), function(age_group) {
-  data.frame(age_group = age_group, year = 2010:2023, births = predict(trends[[age_group]], newdata = data.frame(year = 2010:2023)), type = "Trend")
+
+# --- NEW: generate trend up to the latest available year (includes 2024)
+max_year <- max(data_long$year, na.rm = TRUE)
+
+trend_data <- do.call(rbind, lapply(names(trends), function(ag) {
+  yrs <- 2010:max_year
+  data.frame(
+    age_group = ag,
+    year = yrs,
+    births = predict(trends[[ag]], newdata = data.frame(year = yrs)),
+    type = "Trend"
+  )
 }))
 
-# Calculate the percentage of deviation to the linear trend for 2020, 2021 & 2023
+# --- NEW: compute deviations for 2020..max_year (includes 2024)
 deviations <- data.frame(age_group=character(), year=integer(), deviation=numeric(), stringsAsFactors=FALSE)
-for (age_group in names(age_groups)) {
-  for (year in 2020:2023) {
 
-    # Predict the value using the linear model
-    predicted_value <- predict(trends[[age_group]], newdata = data.frame(year = year))
-    
-    # Get the actual value
+for (ag in names(age_groups)) {
+  for (yr in 2020:max_year) {
+    predicted_value <- predict(trends[[ag]], newdata = data.frame(year = yr))
     actual_value <- data_long %>%
-      filter(age_group == !!age_group, year == !!year) %>%
+      filter(age_group == ag, year == yr) %>%
       pull(births)
-    
-    # Calculate the deviation
+
     deviation <- ((actual_value - predicted_value) / predicted_value) * 100
-    
-    # Append to the deviations data frame
-    deviations <- rbind(deviations, data.frame(age_group=age_group, year=year, deviation=deviation))
+    deviations <- rbind(deviations, data.frame(age_group=ag, year=yr, deviation=deviation))
   }
 }
 
 library(ggplot2)
 
 # Combine actual, trend & deviations data
-data_long$deviation <- NA  # Initialize the column with NAs
-deviation_years <- c(2020, 2021, 2022, 2023)
+data_long$deviation <- NA
+deviation_years <- 2020:max_year
 data_long$deviation[data_long$year %in% deviation_years] <- deviations$deviation
+
 trend_data$deviation <- NA
 combined_data <- rbind(data_long, trend_data)
 
 # Define colors for actual and trend lines
 combined_data$label <- with(combined_data, paste(age_group, type, sep = ", "))
 actual_colors <- c("15-19, Actual" = "blue", "20-24, Actual" = "green", "25-29, Actual" = "brown", "30-48, Actual" = "red")
-trend_colors <- c("15-19, Trend" = "lightblue", "20-24, Trend" = "lightgreen", "25-29, Trend" = "grey", "30-48, Trend" = "pink")
+trend_colors  <- c("15-19, Trend"  = "lightblue", "20-24, Trend"  = "lightgreen", "25-29, Trend"  = "grey", "30-48, Trend"  = "pink")
 
-# Plot the actual values and linear trend values
+# Plot
 p <- ggplot(combined_data, aes(x = year, y = births, group = label)) +
-  geom_line(aes(color = label), size = 1.4) +
-  geom_text(data = subset(combined_data, type == "Actual" & !is.na(deviation)), 
-            aes(label = paste0(round(deviation, 2), "%"), color = label), 
-            vjust = -0.5, size = 4) +
+  geom_line(aes(color = label), linewidth = 1.4) +
+  geom_text(
+    data = subset(combined_data, type == "Actual" & !is.na(deviation)),
+    aes(label = paste0(round(deviation, 2), "%"), color = label),
+    vjust = -0.5, size = 4
+  ) +
   scale_color_manual(values = c(actual_colors, trend_colors)) +
-  labs(title = "Sweden - Births by Age Group 2020, 2021, 2022 & 2023 with Linear Trend (2010-2019)", x = "Year", y = "Number of Births", color = "Legend") +
+  labs(
+    title = paste0("Sweden - Births by Age Group 2020–", max_year, " with Linear Trend (2010-2019)"),
+    x = "Year", y = "Number of Births", color = "Legend"
+  ) +
   theme_minimal() +
-  theme(text = element_text(size = 16),
-        plot.title = element_text(size = 20),
-        axis.title = element_text(size = 18),
-        legend.text = element_text(size = 14),
-        legend.title = element_text(size = 16)) +
-  scale_x_continuous(breaks = 2010:2023)
+  theme(
+    text = element_text(size = 16),
+    plot.title = element_text(size = 20),
+    axis.title = element_text(size = 18),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 16)
+  ) +
+  scale_x_continuous(breaks = 2010:max_year)
 
-# Print the plot
 print(p)
-
-# Print the deviations
 print(deviations)

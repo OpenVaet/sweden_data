@@ -49,12 +49,12 @@ ggplot(stats, aes(x = year, y = population, color = marital_status_group, group 
   geom_line(linewidth = 1.4) +
   facet_wrap(~age_group, scales = 'free_y') +
   scale_y_continuous(labels = label_number()) + # This will ensure y-axis labels are full integers
-  labs(title = "Sweden - 2010-2023 - Population Evolution by Marital Status and Age Group",
+  labs(title = "Sweden - 2010-2024 - Population Evolution by Marital Status and Age Group",
        x = "Year",
        y = "Population",
        color = "Marital Status") +
   theme_minimal() +
-  scale_x_continuous(breaks = 2010:2023)
+  scale_x_continuous(breaks = 2010:2024)
 
 # Summarize population by age_group and year, regardless of marital_status_group
 total_population_by_age_year <- stats %>%

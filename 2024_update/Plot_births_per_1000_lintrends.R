@@ -23,8 +23,8 @@ library(scales)
 # ==============================================================================
 
 # File paths - adjust these to your directory structure
-population_file <- 'women_population_by_age_groups_R.csv'
-births_file <- 'births_by_years_and_mothers_age_groups.csv'
+population_file <- '2024_update/women_population_by_age_groups_R.csv'
+births_file <- '2024_update/births_by_years_and_mothers_age_groups.csv'
 
 # Read the data from CSV files
 population_data <- read_csv(population_file) %>%
@@ -50,7 +50,7 @@ final_data <- merged_data %>%
   select(age_group, year, births_per_1000, asfr, births, total_population)
 
 # Write the final data to CSV
-write_csv(final_data, 'births_per_1000_by_years_mothers_age_groups.csv')
+write_csv(final_data, '2024_update/births_per_1000_by_years_mothers_age_groups.csv')
 
 # ==============================================================================
 # 2. LINEAR TREND ANALYSIS (2010-2019)
@@ -69,13 +69,13 @@ for (age_group in names(age_groups)) {
   fit <- lm(births_per_1000 ~ year, data = subset_data)
   trends[[age_group]] <- fit
   
-  # Calculate prediction intervals for 2010-2023
-  pred_years <- data.frame(year = 2010:2023)
+  # Calculate prediction intervals for 2010-2024 (extended through 2024)
+  pred_years <- data.frame(year = 2010:2024)
   pred_interval <- predict(fit, newdata = pred_years, interval = "prediction", level = 0.95)
   
   prediction_intervals[[age_group]] <- data.frame(
     age_group = age_group,
-    year = 2010:2023,
+    year = 2010:2024,
     fit = pred_interval[, "fit"],
     lwr = pred_interval[, "lwr"],
     upr = pred_interval[, "upr"]
@@ -102,7 +102,7 @@ deviations <- data.frame(age_group = character(),
                         stringsAsFactors = FALSE)
 
 for (age_group in names(age_groups)) {
-  for (year in 2020:2023) {
+  for (year in 2020:2024) {
     # Predict the value using the linear model
     predicted_value <- predict(trends[[age_group]], newdata = data.frame(year = year))
     
@@ -132,7 +132,7 @@ for (age_group in names(age_groups)) {
 # Add type column to actual data
 final_data$type <- "Actual"
 final_data$deviation <- NA
-deviation_years <- c(2020, 2021, 2022, 2023)
+deviation_years <- c(2020, 2021, 2022, 2024)
 
 # Add deviations to final_data
 for (i in 1:nrow(deviations)) {
@@ -192,7 +192,7 @@ p1 <- ggplot() +
              aes(x = year, y = births_per_1000, color = age_group),
              size = 2.5, shape = 19) +
   
-  # Add deviation labels for 2020-2023
+  # Add deviation labels for 2020-2024
   geom_text(data = filter(plot_data, type == "Actual" & !is.na(deviation)),
             aes(x = year, y = births_per_1000, 
                 label = sprintf("%.1f%%", deviation),
@@ -208,13 +208,13 @@ p1 <- ggplot() +
                     labels = c("15-19", "20-24", "25-29", "30-48")) +
   
   # Axis formatting
-  scale_x_continuous(breaks = 2010:2023,
-                     limits = c(2010, 2023.5)) +
+  scale_x_continuous(breaks = 2010:2024,
+                     limits = c(2010, 2024.5)) +
   scale_y_continuous(labels = comma) +
   
   # Labels and theme
-  labs(title = "Sweden: Births per 1,000 Women by Age Group (2010-2023)",
-       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals\nPercentage deviations shown for 2020-2023",
+  labs(title = "Sweden: Births per 1,000 Women by Age Group (2010-2024)",
+       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals (extended to 2024)\nPercentage deviations shown for 2020-2024",
        x = "Year",
        y = "Births per 1,000 Women",
        caption = "Data source: Statistics Sweden\nDashed lines represent linear trend extrapolation from 2010-2019") +
@@ -267,13 +267,13 @@ for (age_group in unique(asfr_data$age_group)) {
   fit <- lm(asfr ~ year, data = subset_data)
   asfr_trends[[age_group]] <- fit
   
-  # Prediction intervals
-  pred_years <- data.frame(year = 2010:2023)
+  # Prediction intervals extended to 2024
+  pred_years <- data.frame(year = 2010:2024)
   pred_interval <- predict(fit, newdata = pred_years, interval = "prediction", level = 0.95)
   
   asfr_pred_intervals[[age_group]] <- data.frame(
     age_group = age_group,
-    year = 2010:2023,
+    year = 2010:2024,
     fit = pred_interval[, "fit"],
     lwr = pred_interval[, "lwr"],
     upr = pred_interval[, "upr"]
@@ -289,10 +289,10 @@ asfr_trend_lines <- asfr_pred_data %>%
 
 asfr_data$type <- "Actual"
 
-# Calculate ASFR deviations for 2020-2023
+# Calculate ASFR deviations for 2020-2024
 asfr_deviations <- data.frame()
 for (age_group in unique(asfr_data$age_group)) {
-  for (year in 2020:2023) {
+  for (year in 2020:2024) {
     predicted <- predict(asfr_trends[[age_group]], newdata = data.frame(year = year))
     actual <- asfr_data %>%
       filter(age_group == !!age_group, year == !!year) %>%
@@ -338,7 +338,7 @@ p2 <- ggplot() +
              aes(x = year, y = asfr, color = age_group),
              size = 2.5, shape = 19) +
   
-  # Add deviation labels for 2020-2023
+  # Add deviation labels for 2020-2024
   geom_text(data = filter(asfr_data, !is.na(deviation)),
             aes(x = year, y = asfr,
                 label = sprintf("%.1f%%", deviation),
@@ -354,13 +354,13 @@ p2 <- ggplot() +
                     labels = c("15-19", "20-24", "25-29", "30-48")) +
   
   # Axis formatting
-  scale_x_continuous(breaks = 2010:2023,
-                     limits = c(2010, 2023.5)) +
+  scale_x_continuous(breaks = 2010:2024,
+                     limits = c(2010, 2024.5)) +
   scale_y_continuous(labels = function(x) sprintf("%.3f", x)) +
   
   # Labels and theme
-  labs(title = "Sweden: Age-Specific Fertility Rates (ASFR) by Age Group (2010-2023)",
-       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals\nPercentage deviations shown for 2020-2023",
+  labs(title = "Sweden: Age-Specific Fertility Rates (ASFR) by Age Group (2010-2024)",
+       subtitle = "Linear trend fitted on 2010-2019 data with 95% prediction intervals (extended to 2024)\nPercentage deviations shown for 2020-2024",
        x = "Year",
        y = "Age-Specific Fertility Rate (births per woman)",
        caption = "Data source: Statistics Sweden\nASFR = Number of births / Female population in age group\nDashed lines represent linear trend extrapolation from 2010-2019") +
@@ -399,7 +399,7 @@ ggsave("sweden_asfr_by_age_group.png", plot = p2,
 
 cat("\n=== SUMMARY STATISTICS ===\n\n")
 
-cat("Deviations from Linear Trend (2020-2023):\n")
+cat("Deviations from Linear Trend (2020-2024):\n")
 print(deviations %>%
   arrange(age_group, year) %>%
   mutate(deviation = sprintf("%.2f%%", deviation),
@@ -413,13 +413,13 @@ for (age_group in names(trends)) {
   cat(sprintf("R-squared: %.4f\n", summary(trends[[age_group]])$r.squared))
 }
 
-cat("\n\nASFR Summary (2023 vs 2019):\n")
+cat("\n\nASFR Summary (2024 vs 2019):\n")
 asfr_comparison <- final_data %>%
-  filter(year %in% c(2019, 2023)) %>%
+  filter(year %in% c(2019, 2024)) %>%
   select(age_group, year, asfr) %>%
   pivot_wider(names_from = year, values_from = asfr, names_prefix = "ASFR_") %>%
   mutate(
-    Change = ASFR_2023 - ASFR_2019,
+    Change = ASFR_2024 - ASFR_2019,
     Pct_Change = (Change / ASFR_2019) * 100
   )
 print(asfr_comparison)
@@ -445,21 +445,21 @@ total_data <- merged_data %>%
 total_subset <- total_data %>% filter(year >= 2010, year <= 2019)
 total_fit <- lm(total_asfr ~ year, data = total_subset)
 
-# Generate predictions with 95% intervals
-pred_years_total <- data.frame(year = 2010:2023)
+# Generate predictions with 95% intervals (extended to 2024)
+pred_years_total <- data.frame(year = 2010:2024)
 total_pred_interval <- predict(total_fit, newdata = pred_years_total, 
                                interval = "prediction", level = 0.95)
 
 total_pred_data <- data.frame(
-  year = 2010:2023,
+  year = 2010:2024,
   fit = total_pred_interval[, "fit"],
   lwr = total_pred_interval[, "lwr"],
   upr = total_pred_interval[, "upr"]
 )
 
-# Calculate deviations for 2020-2023
+# Calculate deviations for 2020-2024
 total_deviations <- data.frame()
-for (year in 2020:2023) {
+for (year in 2020:2024) {
   predicted <- predict(total_fit, newdata = data.frame(year = year))
   actual <- total_data %>% filter(year == !!year) %>% pull(total_asfr)
   deviation <- ((actual - predicted) / predicted) * 100
@@ -501,20 +501,20 @@ p3 <- ggplot() +
              aes(x = year, y = total_asfr),
              size = 3.5, shape = 19, color = "#4E79A7") +
   
-  # Add deviation labels for 2020-2023
+  # Add deviation labels for 2020-2024
   geom_text(data = filter(total_data, !is.na(deviation)),
             aes(x = year, y = total_asfr,
                 label = sprintf("%.1f%%", deviation)),
             vjust = -1.5, size = 4, fontface = "bold", color = "#4E79A7") +
   
   # Axis formatting
-  scale_x_continuous(breaks = 2010:2023,
-                     limits = c(2010, 2023.5)) +
+  scale_x_continuous(breaks = 2010:2024,
+                     limits = c(2010, 2024.5)) +
   scale_y_continuous(labels = function(x) sprintf("%.4f", x)) +
   
   # Labels and theme
-  labs(title = "Sweden: Total Age-Specific Fertility Rate (All Ages Combined, 2010-2023)",
-       subtitle = "Weighted ASFR across all reproductive age groups (15-48) with 95% prediction interval\nLinear trend fitted on 2010-2019 data; percentage deviations shown for 2020-2023",
+  labs(title = "Sweden: Total Age-Specific Fertility Rate (All Ages Combined, 2010-2024)",
+       subtitle = "Weighted ASFR across all reproductive age groups (15-48) with 95% prediction interval (extended to 2024)\nLinear trend fitted on 2010-2019 data; percentage deviations shown for 2020-2024",
        x = "Year",
        y = "Total ASFR (births per woman across all ages)",
        caption = "Data source: Statistics Sweden\nTotal ASFR = Sum of births across all age groups / Sum of female population (ages 15-48)\nDashed line represents linear trend extrapolation from 2010-2019") +
@@ -545,7 +545,7 @@ cat("Linear Model Coefficients (2010-2019):\n")
 print(summary(total_fit)$coefficients)
 cat(sprintf("R-squared: %.4f\n", summary(total_fit)$r.squared))
 
-cat("\n\nTotal ASFR Deviations (2020-2023):\n")
+cat("\n\nTotal ASFR Deviations (2020-2024):\n")
 print(total_deviations %>%
   mutate(deviation = sprintf("%.2f%%", deviation),
          actual = sprintf("%.5f", actual),
@@ -553,17 +553,17 @@ print(total_deviations %>%
 
 cat("\n\nTotal ASFR Change Summary:\n")
 total_comparison <- total_data %>%
-  filter(year %in% c(2010, 2019, 2023)) %>%
+  filter(year %in% c(2010, 2019, 2024)) %>%
   select(year, total_asfr, total_births, total_population)
 print(total_comparison)
 
-cat(sprintf("\nChange 2019 to 2023: %.2f%%\n", 
-            ((total_data$total_asfr[total_data$year == 2023] - 
+cat(sprintf("\nChange 2019 to 2024: %.2f%%\n", 
+            ((total_data$total_asfr[total_data$year == 2024] - 
               total_data$total_asfr[total_data$year == 2019]) / 
              total_data$total_asfr[total_data$year == 2019]) * 100))
 
-cat(sprintf("Change 2010 to 2023: %.2f%%\n", 
-            ((total_data$total_asfr[total_data$year == 2023] - 
+cat(sprintf("Change 2010 to 2024: %.2f%%\n", 
+            ((total_data$total_asfr[total_data$year == 2024] - 
               total_data$total_asfr[total_data$year == 2010]) / 
              total_data$total_asfr[total_data$year == 2010]) * 100))
 
