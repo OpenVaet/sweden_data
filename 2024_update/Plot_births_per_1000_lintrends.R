@@ -2,6 +2,14 @@
 # Swedish Birth Rate Analysis
 # Births per 1000 Women with Linear Trends and ASFR Analysis
 # ==============================================================================
+# The two scripts :
+# 2024_update/Plot_lintrend_break_4_up_to_48.R
+# 2024_update/Plot_women_population.R
+# Must be executed before - with the data sources names properly replaced if 
+# you downloaded news ones to verify the assets.
+# Sources at https://openvaet.info => New Nature Study Finds No Correlation
+# Between COVID-19 Vaccines And Fertility Issues
+# ==============================================================================
 
 # Load necessary libraries
 library(dplyr)
