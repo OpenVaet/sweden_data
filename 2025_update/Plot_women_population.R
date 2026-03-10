@@ -93,7 +93,7 @@ mk_group5 <- function(a) {
 }
 
 # =====================================================================
-# 2. LINE PLOTS - Women 15-48, 5-year groups, 1860-2025
+# 2. LINE PLOTS - Women 0-48, 5-year groups, 1860-2025
 # =====================================================================
 
 pop_fertile <- pop %>%
@@ -105,15 +105,27 @@ pop_fertile <- pop %>%
   mutate(AgeGroup5 = factor(AgeGroup5,
                             levels = sort(unique(mk_group5(seq(15, 48))))))
 
-# -- Faceted line plot --
-p_lines <- ggplot(pop_fertile, aes(x = Year, y = Population)) +
+pop_extended <- pop %>%
+  filter(Age >= 0, Age <= 48) %>%
+  mutate(AgeGroup5 = mk_group5(Age),
+         grp_start = (Age %/% 5) * 5) %>%
+  group_by(AgeGroup5, grp_start, Year) %>%
+  summarise(Population = sum(Population, na.rm = TRUE), .groups = "drop") %>%
+  mutate(AgeGroup5 = factor(AgeGroup5,
+                            levels = sort(unique(mk_group5(seq(0, 48))))))
+
+# -- Faceted line plot (0-48) --
+p_lines <- ggplot(pop_extended, aes(x = Year, y = Population)) +
   geom_line(aes(color = AgeGroup5), linewidth = 0.9) +
   facet_wrap(~ AgeGroup5, scales = "free_y", ncol = 2) +
   scale_x_continuous(breaks = seq(1860, 2030, by = 20)) +
   scale_y_continuous(labels = label_number(scale_cut = cut_si(""))) +
-  scale_color_brewer(palette = "Set2", guide = "none") +
+  scale_color_manual(values = rep(c("#66c2a5","#fc8d62","#8da0cb","#e78ac3",
+                                     "#a6d854","#ffd92f","#e5c494","#b3b3b3",
+                                     "#1b9e77","#d95f02"), 2),
+                     guide = "none") +
   labs(
-    title    = "Swedish Women - Population by 5-Year Age Group (15-48)",
+    title    = "Swedish Women - Population by 5-Year Age Group (0-48)",
     subtitle = "Source: SCB, 1860-2025",
     x = NULL, y = "Population"
   ) +
@@ -129,8 +141,8 @@ p_lines <- ggplot(pop_fertile, aes(x = Year, y = Population)) +
 
 p_lines
 
-ggsave(file.path(OUT_DIR, "women_15_48_faceted_lines_1860_2025.png"),
-       p_lines, width = 14, height = 12, dpi = 300, bg = "white")
+ggsave(file.path(OUT_DIR, "women_0_48_faceted_lines_1860_2025.png"),
+       p_lines, width = 14, height = 16, dpi = 300, bg = "white")
 
 # -- Combined (all groups on one panel) --
 p_combined <- ggplot(pop_fertile, aes(x = Year, y = Population,

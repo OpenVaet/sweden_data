@@ -116,15 +116,25 @@ cat("ASFR computed:", nrow(asfr_std), "years,",
     min(asfr_std$Year), "-", max(asfr_std$Year), "\n")
 
 # =====================================================================
-# 4. LINEAR TREND 2012-2020 + 95% PI 2021-2025
+# 4. LINEAR TRENDS + 95% PI 2021-2025
 # =====================================================================
 
-# Fit linear model on 2012–2020
+# --- Trend 1: 1970–2020 ---
+fit_data_70 <- asfr_std %>% filter(Year >= 1970, Year <= 2020)
+lm_70 <- lm(ASFR_std_1000 ~ Year, data = fit_data_70)
+
+cat("Linear trend 1970-2020:\n")
+cat("  Slope:    ", coef(lm_70)[2], "per year\n")
+cat("  R²:       ", summary(lm_70)$r.squared, "\n")
+
+trend_70 <- tibble(Year = 1970:2020) %>%
+  mutate(fit = predict(lm_70, newdata = .))
+
+# --- Trend 2: 2012–2020 (existing) ---
 fit_data <- asfr_std %>% filter(Year >= 2012, Year <= 2020)
 lm_fit   <- lm(ASFR_std_1000 ~ Year, data = fit_data)
 
 cat("Linear trend 2012-2020:\n")
-cat("  Intercept:", coef(lm_fit)[1], "\n")
 cat("  Slope:    ", coef(lm_fit)[2], "per year\n")
 cat("  R²:       ", summary(lm_fit)$r.squared, "\n")
 
@@ -137,12 +147,6 @@ pi_years <- tibble(Year = 2021:2025)
 pi_pred  <- predict(lm_fit, newdata = pi_years, interval = "prediction", level = 0.95)
 pi_df    <- bind_cols(pi_years, as_tibble(pi_pred)) %>%
   rename(fit = fit, lwr = lwr, upr = upr)
-
-# Combine trend + PI for ribbon plotting
-trend_full <- bind_rows(
-  trend_line %>% mutate(lwr = NA_real_, upr = NA_real_),
-  pi_df
-)
 
 # =====================================================================
 # 5. PLOT (single axis: ASFR + Infant Mortality both per 1,000)
@@ -163,6 +167,9 @@ p <- ggplot() +
             linewidth = 0.9, color = "black") +
   geom_point(data = asfr_std, aes(x = Year, y = ASFR_std_1000),
              size = 0.8, color = "black") +
+  # Linear trend 1970–2020
+  geom_line(data = trend_70, aes(x = Year, y = fit),
+            linewidth = 0.7, color = "#e7298a", linetype = "longdash") +
   # 95% prediction interval ribbon (2021–2025)
   geom_ribbon(data = pi_df, aes(x = Year, ymin = lwr, ymax = upr),
               fill = "#3182bd", alpha = 0.2) +
@@ -178,15 +185,20 @@ p <- ggplot() +
         y = tail(trend_line$fit, 1), yend = head(pi_df$fit, 1)),
     linewidth = 0.8, color = "#3182bd", linetype = "dashed"
   ) +
+  # Trend labels
+  annotate("text", x = 1973, y = predict(lm_70, newdata = tibble(Year = 1973)) + 4,
+           label = paste0("1970\u20132020: ", sprintf("%+.2f", coef(lm_70)[2]), "/yr"),
+           color = "#e7298a", fontface = "bold", size = 3.5, hjust = 0) +
+  annotate("text", x = 2012, y = predict(lm_fit, newdata = tibble(Year = 2012)) + 4,
+           label = paste0("2012\u20132020: ", sprintf("%+.2f", coef(lm_fit)[2]), "/yr"),
+           color = "#3182bd", fontface = "bold", size = 3.5, hjust = 0) +
   scale_x_continuous(breaks = seq(1900, 2025, by = 10)) +
   scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
   labs(
     title    = "Age-Standardized Fertility Rate (ESP 2013) & Infant Mortality - Sweden",
     subtitle = paste0(
-      "Black: ASFR 15-48 (births/1,000 women). Orange: infant mortality (deaths in 1st year/1,000 live births). ",
-      "Blue: linear trend 2012\u20132020 (slope = ",
-      sprintf("%.2f", coef(lm_fit)[2]),
-      "/yr) + 95% PI."
+      "Black: ASFR 15-48. Orange: infant mortality. ",
+      "Linear trends: 1970\u20132020 (pink), 2012\u20132020 (blue) + 95% PI."
     ),
     x = NULL, y = "Rate per 1,000"
   ) +
