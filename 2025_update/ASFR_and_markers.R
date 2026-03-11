@@ -1,7 +1,7 @@
 ###############################################################
 ## Age-Standardized Fertility Rate (ASFR) - ESP 2013 weights
 ## Ages 15–48, Swedish women
-## Linear trend fitted on 2012–2020, 95% PI projected to 2021–2025
+## Linear trend fitted on 2010–2020, 95% PI projected to 2021–2025
 ## + historical markers / eras
 ###############################################################
 
@@ -90,10 +90,10 @@ lm_70 <- lm(ASFR_std_1000 ~ Year, data = fit_data_70)
 trend_70 <- tibble(Year = 1970:2020) %>%
   mutate(fit = predict(lm_70, newdata = .))
 
-# --- Trend 2: 2012–2020 ---
-fit_data <- asfr_std %>% filter(Year >= 2012, Year <= 2020)
+# --- Trend 2: 2010–2020 ---
+fit_data <- asfr_std %>% filter(Year >= 2010, Year <= 2020)
 lm_fit   <- lm(ASFR_std_1000 ~ Year, data = fit_data)
-trend_line <- tibble(Year = 2012:2020) %>%
+trend_line <- tibble(Year = 2010:2020) %>%
   mutate(fit = predict(lm_fit, newdata = .))
 
 pi_years <- tibble(Year = 2021:2025)
@@ -177,7 +177,7 @@ p <- ggplot() +
   # 95% PI ribbon
   geom_ribbon(data = pi_df, aes(x = Year, ymin = lwr, ymax = upr),
               fill = "#3182bd", alpha = 0.2) +
-  # Linear trend 2012–2020
+  # Linear trend 2010–2020
   geom_line(data = trend_line, aes(x = Year, y = fit),
             linewidth = 1.1, color = "#3182bd") +
   # Extrapolation
@@ -215,11 +215,11 @@ p <- ggplot() +
   # Trend slope annotations
   annotate("text", x = 1975,
            y = predict(lm_70, newdata = tibble(Year = 1975)) - 7,
-           label = paste0("1970\u20132020: ", sprintf("%+.2f", coef(lm_70)[2]), "/yr"),
+           label = paste0("1970-2020: ", sprintf("%+.2f", coef(lm_70)[2]), "/yr"),
            color = "#e7298a", fontface = "bold", size = 4.8, hjust = 0) +
   annotate("text", x = 2001,
-           y = predict(lm_fit, newdata = tibble(Year = 2012)) + 6,
-           label = paste0("2012\u20132020: ", sprintf("%+.2f", coef(lm_fit)[2]), "/yr"),
+           y = predict(lm_fit, newdata = tibble(Year = 2010)) + 6,
+           label = paste0("2010-2020: ", sprintf("%+.2f", coef(lm_fit)[2]), "/yr"),
            color = "#3182bd", fontface = "bold", size = 4.8, hjust = 0) +
   scale_x_continuous(
     breaks = seq(1900, 2025, by = 10),
@@ -230,8 +230,8 @@ p <- ggplot() +
     expand = expansion(mult = c(0, 0))
   ) +
   labs(
-    title    = "Age-Standardized Fertility Rate (ESP 2013) - Sweden, 1891\u20132025",
-    subtitle = "ASFR across 5-year groups, ages 15\u201348. Shaded bands: demographic eras. Red dotted: policy milestones.",
+    title    = "Age-Standardized Fertility Rate (ESP 2013) - Sweden, 1891-2025",
+    subtitle = "ASFR across 5-year groups, ages 15-48. Shaded bands: demographic eras. Red dotted: policy milestones.",
     x = NULL, y = "ASFR (per 1,000 women)"
   ) +
   theme_minimal(base_size = 16) +
