@@ -200,7 +200,7 @@ p1 <- ggplot(df, aes(x = year)) +
     )
   ) +
   labs(
-    title = "ASFR vs Housing Affordability \u2014 Sweden, 1971\u20132024",
+    title = "ASFR vs Housing Affordability - Sweden, 1971\u20132024",
     subtitle = paste0(
       "Black: ASFR (ESP 2013, ages 15\u201348). ",
       "Orange: real house prices / real labour costs (1971=100). ",
@@ -220,8 +220,6 @@ p1 <- ggplot(df, aes(x = year)) +
     panel.background   = element_rect(fill = "white", color = NA),
     plot.background    = element_rect(fill = "white", color = NA)
   )
-
-p1
 
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_timeseries.png"),
        p1, width = 15, height = 8, dpi = 300, bg = "white")
@@ -258,7 +256,7 @@ p1b <- ggplot(df_lag1_ts, aes(x = year)) +
     )
   ) +
   labs(
-    title = "ASFR vs Housing Affordability (1-year lag) \u2014 Sweden",
+    title = "ASFR vs Housing Affordability (1-year lag) - Sweden",
     subtitle = paste0(
       "Black: ASFR. Orange: affordability index shifted forward 1 year ",
       "(value at year N plotted at N+1). ",
@@ -278,8 +276,6 @@ p1b <- ggplot(df_lag1_ts, aes(x = year)) +
     panel.background   = element_rect(fill = "white", color = NA),
     plot.background    = element_rect(fill = "white", color = NA)
   )
-
-p1b
 
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_timeseries_lag1.png"),
        p1b, width = 15, height = 8, dpi = 300, bg = "white")
@@ -303,7 +299,7 @@ p2 <- ggplot(df, aes(x = affordability_index, y = ASFR_1000)) +
   ) +
   scale_color_viridis_c(name = "Year", option = "C") +
   labs(
-    title = "ASFR vs Housing Affordability \u2014 Scatter",
+    title = "ASFR vs Housing Affordability - Scatter",
     subtitle = paste0(
       "Each point = one year (1971\u20132024). ",
       "Pearson r = ", sprintf("%.2f", cor_pearson),
@@ -324,8 +320,6 @@ p2 <- ggplot(df, aes(x = affordability_index, y = ASFR_1000)) +
     plot.background  = element_rect(fill = "white", color = NA)
   )
 
-p2
-
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_scatter.png"),
        p2, width = 12, height = 9, dpi = 300, bg = "white")
 
@@ -341,14 +335,14 @@ p3 <- ggplot(df_chg, aes(x = d_afford, y = d_asfr)) +
   geom_point(aes(color = year), size = 2.5) +
   scale_color_viridis_c(name = "Year", option = "C") +
   labs(
-    title = "\u0394 ASFR vs \u0394 Affordability \u2014 Year-over-Year Changes",
+    title = "ASFR vs Affordability - Year-over-Year Changes",
     subtitle = paste0(
       "Each point = one year\u2019s change. ",
       "Pearson r = ", sprintf("%.2f", cor_chg_pearson),
       ", p = ", sprintf("%.2e", cor_chg_test$p.value), "."
     ),
-    x = "\u0394 Affordability index (year-over-year)",
-    y = "\u0394 ASFR (per 1,000 women, year-over-year)"
+    x = "Affordability index (year-over-year)",
+    y = "ASFR (per 1,000 women, year-over-year)"
   ) +
   theme_minimal(base_size = 15) +
   theme(
@@ -360,8 +354,6 @@ p3 <- ggplot(df_chg, aes(x = d_afford, y = d_asfr)) +
     panel.background = element_rect(fill = "white", color = NA),
     plot.background  = element_rect(fill = "white", color = NA)
   )
-
-p3
 
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_changes.png"),
        p3, width = 12, height = 9, dpi = 300, bg = "white")
@@ -378,14 +370,14 @@ p4 <- ggplot(df_chg_lag1, aes(x = d_afford_lag1, y = d_asfr)) +
   geom_point(aes(color = year), size = 2.5) +
   scale_color_viridis_c(name = "Year", option = "C") +
   labs(
-    title = "\u0394 ASFR vs \u0394 Affordability \u2014 1-Year Lag",
+    title = "ASFR vs Affordability - 1-Year Lag",
     subtitle = paste0(
       "X = affordability change at year N, Y = ASFR change at year N+1. ",
       "Pearson r = ", sprintf("%.2f", cor_lag1_pearson),
       ", p = ", sprintf("%.2e", cor_lag1_test$p.value), "."
     ),
-    x = "\u0394 Affordability index (year N)",
-    y = "\u0394 ASFR (per 1,000 women, year N+1)"
+    x = "Affordability index (year N)",
+    y = "ASFR (per 1,000 women, year N+1)"
   ) +
   theme_minimal(base_size = 15) +
   theme(
@@ -397,8 +389,6 @@ p4 <- ggplot(df_chg_lag1, aes(x = d_afford_lag1, y = d_asfr)) +
     panel.background = element_rect(fill = "white", color = NA),
     plot.background  = element_rect(fill = "white", color = NA)
   )
-
-p4
 
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_changes_lag1.png"),
        p4, width = 12, height = 9, dpi = 300, bg = "white")
@@ -532,15 +522,15 @@ p5 <- ggplot(df_resid, aes(x = resid_afford, y = resid_asfr)) +
   geom_point(aes(color = year), size = 2.5) +
   scale_color_viridis_c(name = "Year", option = "C") +
   labs(
-    title = "Partial Correlation: \u0394 ASFR vs \u0394 Affordability, controlling for GDP",
+    title = "Partial Correlation: ASFR vs Affordability, controlling for GDP",
     subtitle = paste0(
       "Residuals after regressing each on GDP growth. ",
       "Partial r = ", sprintf("%.2f", partial_r_gdp),
       " (raw r = ", sprintf("%.2f", raw_r_gdp),
       "). p = ", sprintf("%.2e", partial_ct_gdp$p.value), "."
     ),
-    x = "Residual \u0394 Affordability (GDP-adjusted)",
-    y = "Residual \u0394 ASFR (GDP-adjusted)"
+    x = "Residual Affordability (GDP-adjusted)",
+    y = "Residual ASFR (GDP-adjusted)"
   ) +
   theme_minimal(base_size = 15) +
   theme(
@@ -553,10 +543,169 @@ p5 <- ggplot(df_resid, aes(x = resid_afford, y = resid_asfr)) +
     plot.background  = element_rect(fill = "white", color = NA)
   )
 
-p5
-
 ggsave(file.path(OUT_DIR, "ASFR_vs_affordability_partial_GDP.png"),
        p5, width = 12, height = 9, dpi = 300, bg = "white")
+
+# =====================================================================
+# 11. VISUAL OVERVIEW — All factors alongside ASFR
+# =====================================================================
+
+# Merge all series for plotting
+df_all <- df %>%
+  left_join(gdp, by = "year") %>%
+  left_join(unemp, by = "year")
+
+# --- 11a. ASFR vs Unemployment (dual axis) ---
+# Scale unemployment onto ASFR axis (inverted — high UE at bottom)
+ue_sub  <- df_all %>% filter(!is.na(unemp_rate))
+asfr_r  <- range(ue_sub$ASFR_1000)
+ue_r    <- range(ue_sub$unemp_rate)
+a_ue    <- diff(asfr_r) / diff(ue_r)
+b_ue    <- asfr_r[2] - a_ue * ue_r[1]  # high ASFR = low UE (inverted)
+
+# Correlation for subtitle
+cor_ue_asfr <- cor.test(ue_sub$unemp_rate, ue_sub$ASFR_1000)
+
+p_ue <- ggplot(ue_sub, aes(x = year)) +
+  geom_line(aes(y = ASFR_1000), color = "black", linewidth = 1.2) +
+  geom_line(aes(y = -a_ue * unemp_rate + b_ue),
+            color = "#e41a1c", linewidth = 1.1) +
+  scale_x_continuous(breaks = seq(1985, 2025, by = 5)) +
+  scale_y_continuous(
+    name = "ASFR (per 1,000 women)",
+    sec.axis = sec_axis(
+      ~ -(. - b_ue) / a_ue,
+      name = "Unemployment rate (%, inverted)"
+    )
+  ) +
+  labs(
+    title = "ASFR vs Unemployment Rate - Sweden",
+    subtitle = paste0(
+      "Black: ASFR. Red: unemployment (inverted axis - up = lower unemployment). ",
+      "r = ", sprintf("%.2f", cor_ue_asfr$estimate),
+      " (p = ", sprintf("%.2e", cor_ue_asfr$p.value), ")."
+    ),
+    x = NULL
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title         = element_text(face = "bold", size = 20),
+    plot.subtitle      = element_text(size = 11, color = "grey30"),
+    axis.title.y.left  = element_text(color = "black", face = "bold", size = 13),
+    axis.title.y.right = element_text(color = "#e41a1c", face = "bold", size = 13),
+    axis.text.y.right  = element_text(color = "#e41a1c"),
+    axis.text          = element_text(size = 12),
+    panel.grid.minor   = element_blank(),
+    panel.background   = element_rect(fill = "white", color = NA),
+    plot.background    = element_rect(fill = "white", color = NA)
+  )
+
+ggsave(file.path(OUT_DIR, "ASFR_vs_unemployment_timeseries.png"),
+       p_ue, width = 15, height = 8, dpi = 300, bg = "white")
+
+# --- 11b. ASFR vs GDP growth (dual axis) ---
+gdp_sub <- df_all %>% filter(!is.na(gdp_growth))
+asfr_r2 <- range(gdp_sub$ASFR_1000)
+gdp_r   <- range(gdp_sub$gdp_growth)
+a_gdp   <- diff(asfr_r2) / diff(gdp_r)
+b_gdp   <- asfr_r2[1] - a_gdp * gdp_r[1]
+
+cor_gdp_asfr <- cor.test(gdp_sub$gdp_growth, gdp_sub$ASFR_1000)
+
+p_gdp <- ggplot(gdp_sub, aes(x = year)) +
+  geom_hline(yintercept = a_gdp * 0 + b_gdp, linetype = "dotted",
+             color = "grey60", linewidth = 0.4) +
+  geom_line(aes(y = ASFR_1000), color = "black", linewidth = 1.2) +
+  geom_line(aes(y = a_gdp * gdp_growth + b_gdp),
+            color = "#377eb8", linewidth = 0.9, alpha = 0.8) +
+  scale_x_continuous(breaks = seq(1975, 2025, by = 5)) +
+  scale_y_continuous(
+    name = "ASFR (per 1,000 women)",
+    sec.axis = sec_axis(
+      ~ (. - b_gdp) / a_gdp,
+      name = "Real GDP growth (%)"
+    )
+  ) +
+  labs(
+    title = "ASFR vs GDP Growth - Sweden",
+    subtitle = paste0(
+      "Black: ASFR. Blue: real GDP growth (%). ",
+      "Levels r = ", sprintf("%.2f", cor_gdp_asfr$estimate),
+      " (p = ", sprintf("%.2e", cor_gdp_asfr$p.value), ")."
+    ),
+    x = NULL
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title         = element_text(face = "bold", size = 20),
+    plot.subtitle      = element_text(size = 11, color = "grey30"),
+    axis.title.y.left  = element_text(color = "black", face = "bold", size = 13),
+    axis.title.y.right = element_text(color = "#377eb8", face = "bold", size = 13),
+    axis.text.y.right  = element_text(color = "#377eb8"),
+    axis.text          = element_text(size = 12),
+    panel.grid.minor   = element_blank(),
+    panel.background   = element_rect(fill = "white", color = NA),
+    plot.background    = element_rect(fill = "white", color = NA)
+  )
+
+ggsave(file.path(OUT_DIR, "ASFR_vs_GDP_timeseries.png"),
+       p_gdp, width = 15, height = 8, dpi = 300, bg = "white")
+
+# --- 11c. Combined 4-panel summary ---
+# All three factors + ASFR on one tall figure
+df_long_factors <- df_all %>%
+  filter(!is.na(unemp_rate), !is.na(gdp_growth)) %>%
+  select(year, ASFR_1000, affordability_index, unemp_rate, gdp_growth) %>%
+  pivot_longer(-year, names_to = "series", values_to = "value") %>%
+  mutate(series = factor(series,
+    levels = c("ASFR_1000", "unemp_rate", "affordability_index", "gdp_growth"),
+    labels = c("ASFR (per 1,000 women)",
+               "Unemployment rate (%)",
+               "Housing affordability (1971=100)",
+               "Real GDP growth (%)")
+  ))
+
+p_panel <- ggplot(df_long_factors, aes(x = year, y = value)) +
+  geom_line(aes(color = series), linewidth = 1.1, show.legend = FALSE) +
+  geom_hline(
+    data = data.frame(
+      series = factor(
+        c("Real GDP growth (%)"),
+        levels = levels(df_long_factors$series)
+      ),
+      yint = 0
+    ),
+    aes(yintercept = yint), linetype = "dotted", color = "grey50"
+  ) +
+  facet_wrap(~ series, ncol = 1, scales = "free_y") +
+  scale_color_manual(values = c(
+    "ASFR (per 1,000 women)" = "black",
+    "Unemployment rate (%)" = "#e41a1c",
+    "Housing affordability (1971=100)" = "#d95f02",
+    "Real GDP growth (%)" = "#377eb8"
+  )) +
+  scale_x_continuous(breaks = seq(1985, 2025, by = 5)) +
+  labs(
+    title = "ASFR and Economic Factors - Sweden",
+    subtitle = "Each panel shares the same x-axis. Compare turning points across series visually.",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 20),
+    plot.subtitle    = element_text(size = 12, color = "grey30"),
+    strip.text       = element_text(face = "bold", size = 13),
+    axis.text        = element_text(size = 11),
+    panel.grid.minor = element_blank(),
+    panel.spacing    = unit(0.8, "lines"),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background  = element_rect(fill = "white", color = NA)
+  )
+
+ggsave(file.path(OUT_DIR, "ASFR_and_economic_factors_panel.png"),
+       p_panel, width = 15, height = 14, dpi = 300, bg = "white")
+
+p_panel
 
 # =====================================================================
 # 11. EXPORT
