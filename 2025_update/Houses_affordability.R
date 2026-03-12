@@ -18,8 +18,11 @@
 ##
 ## Sources (FRED):
 ##   - QSER628BIS       : BIS Real Residential Property Prices (2010=100)
+##   https://fred.stlouisfed.org/series/QSER628BIS
 ##   - LCEAMN01SEA661N  : OECD Labour Cost Index, nominal (2015=100)
+##   https://fred.stlouisfed.org/series/LCEAMN01SEA661N
 ##   - SWECPIALLAINMEI  : OECD CPI (2015=100)
+##   https://fred.stlouisfed.org/series/SWECPIALLAINMEI
 ###############################################################
 
 suppressPackageStartupMessages({
